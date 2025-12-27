@@ -30,7 +30,7 @@ class ToothbrushLifespanCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8), // Reduced padding
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(

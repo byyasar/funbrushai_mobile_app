@@ -37,7 +37,6 @@ class _ToothbrushCardScreenState extends State<ToothbrushCardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
         child: Column(
           children: [
@@ -69,6 +68,7 @@ class _ToothbrushCardScreenState extends State<ToothbrushCardScreen> {
     final now = DateTime.now();
     // Use renewalDate as the effective start date if available, otherwise startDate
     final effectiveStartDate = toothbrush.renewalDate ?? toothbrush.startDate;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     // Calculate expiration based on effective start date + renewal period
     final expirationDate = toothbrush.expirationDate ??
@@ -82,7 +82,7 @@ class _ToothbrushCardScreenState extends State<ToothbrushCardScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.cardLight,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -107,7 +107,7 @@ class _ToothbrushCardScreenState extends State<ToothbrushCardScreen> {
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textLight,
+                      // color: AppColors.textLight, // Removed for theme
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -127,11 +127,11 @@ class _ToothbrushCardScreenState extends State<ToothbrushCardScreen> {
                     ElevatedButton.icon(
                       onPressed: () => _showEditNameDialog(toothbrush),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: AppColors.primary,
+                        backgroundColor: isDark ? Theme.of(context).cardColor : Colors.white,
+                        foregroundColor: isDark ? AppColors.primaryLight : AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
-                          side: const BorderSide(color: AppColors.primary),
+                          side: BorderSide(color: isDark ? AppColors.primaryLight : AppColors.primary),
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                         elevation: 0,
@@ -149,13 +149,23 @@ class _ToothbrushCardScreenState extends State<ToothbrushCardScreen> {
                           lastDate: DateTime(2030),
                           locale: const Locale('tr', 'TR'),
                           builder: (context, child) {
+                            final isDark = Theme.of(context).brightness == Brightness.dark;
                             return Theme(
                               data: Theme.of(context).copyWith(
-                                colorScheme: const ColorScheme.light(
-                                  primary: AppColors.primary,
-                                  onPrimary: Colors.white,
-                                  onSurface: AppColors.textLight,
-                                ),
+                                colorScheme: isDark
+                                    ? const ColorScheme.dark(
+                                        primary: AppColors.primary,
+                                        onPrimary: Colors.white,
+                                        surface: AppColors.cardDark,
+                                        onSurface: Colors.white,
+                                      )
+                                    : const ColorScheme.light(
+                                        primary: AppColors.primary,
+                                        onPrimary: Colors.white,
+                                        surface: Colors.white,
+                                        onSurface: Colors.black,
+                                      ),
+                                dialogBackgroundColor: isDark ? AppColors.backgroundDark : Colors.white,
                               ),
                               child: child!,
                             );
@@ -181,14 +191,14 @@ class _ToothbrushCardScreenState extends State<ToothbrushCardScreen> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: isDark ? AppColors.primaryDark : AppColors.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                         elevation: 4,
-                        shadowColor: AppColors.primary.withOpacity(0.3),
+                        shadowColor: (isDark ? AppColors.primaryDark : AppColors.primary).withOpacity(0.3),
                       ),
                       icon: const Icon(Icons.restart_alt, size: 20),
                       label: const Text('Sıfırla'),
@@ -204,7 +214,7 @@ class _ToothbrushCardScreenState extends State<ToothbrushCardScreen> {
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: AppColors.backgroundLight,
+              backgroundColor: Theme.of(context).dividerColor,
               valueColor: AlwaysStoppedAnimation<Color>(
                 progress > 0.9 ? AppColors.redMissed : AppColors.primary,
               ),

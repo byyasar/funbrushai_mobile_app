@@ -37,7 +37,7 @@ class CalendarDayTile extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.all(2),
         decoration: BoxDecoration(
-          color: isDarkMode ? AppColors.backgroundDark : AppColors.backgroundLight,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: AppColors.primaryLight.withOpacity(0.2),

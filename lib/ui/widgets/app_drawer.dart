@@ -1,0 +1,100 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/providers/theme_provider.dart';
+
+class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      child: Column(
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.primaryLight],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      image: const DecorationImage(
+                        image: AssetImage('assets/icon/app_icon.jpg'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'FunBrushBoxApp',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.home, color: AppColors.primary),
+                  title: const Text('Ana Sayfa'),
+                  onTap: () {
+                    Navigator.pop(context); // Close drawer
+                  },
+                ),
+                // Theme Toggle
+                Consumer<ThemeProvider>(
+                  builder: (context, themeProvider, child) {
+                    return SwitchListTile(
+                      title: const Text('Karanlık Mod'),
+                      secondary: Icon(
+                        themeProvider.isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                        color: AppColors.primary,
+                      ),
+                      value: themeProvider.isDarkMode,
+                      onChanged: (bool value) {
+                        themeProvider.setThemeMode(
+                          value ? ThemeMode.dark : ThemeMode.light,
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Versiyon 1.0.0',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.grey,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(height: MediaQuery.of(context).padding.bottom),
+        ],
+      ),
+    );
+  }
+}

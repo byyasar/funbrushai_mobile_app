@@ -165,7 +165,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
         child: Column(
           children: [
@@ -189,16 +188,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                           ),*/
                           const SizedBox(height: 24),
+                          // Theme Toggle Section Removed (Moved to Drawer)
+                          
+                          const SizedBox(height: 8), // Adjusted spacing
+                          Text(
+                            'Kullanıcı Avatarını Düzenle',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  // color: AppColors.textDark, // Removed to use theme color
+                                ),
+                          ),
+                          const SizedBox(height: 16),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).cardTheme.color,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: Colors.grey.shade300),
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<Toothbrush>(
                                 value: _selectedBrush,
+                                dropdownColor: Theme.of(context).cardTheme.color,
                                 isExpanded: true,
                                 hint: const Text('Kullanıcı Seçin'),
                                 items: _toothbrushes.map((brush) {

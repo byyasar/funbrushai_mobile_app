@@ -3,24 +3,30 @@ import '../../core/constants/app_colors.dart';
 
 class AppBanner extends StatelessWidget {
   final VoidCallback? onSettingsPressed;
+  final VoidCallback? onMenuPressed;
   final String? title;
   final bool showBackButton;
 
   const AppBanner({
     super.key,
     this.onSettingsPressed,
+    this.onMenuPressed,
     this.title,
     this.showBackButton = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 24), // More padding at bottom for header feel
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
+        gradient: LinearGradient(
+          colors: isDark 
+              ? [AppColors.primaryDark, AppColors.primaryLightDark]
+              : [AppColors.primary, AppColors.primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -54,8 +60,20 @@ class AppBanner extends StatelessWidget {
                         size: 28,
                       ),
                     ),
-                  ),
-                if (!showBackButton) ...[
+                  )
+                else if (onMenuPressed != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: GestureDetector(
+                      onTap: onMenuPressed,
+                      child: const Icon(
+                        Icons.menu,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                  )
+                else ...[
                   Container(
                     width: 40,
                     height: 40,

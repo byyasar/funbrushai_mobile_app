@@ -7,6 +7,7 @@ import '../widgets/toothbrush_lifespan_card.dart';
 import 'social_accountability_screen.dart';
 import 'toothbrush_card_screen.dart';
 import 'settings_screen.dart';
+import '../widgets/app_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Toothbrush> _toothbrushes = [];
   bool _isLoading = true;
 
@@ -49,11 +51,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      key: _scaffoldKey,
+      drawer: const AppDrawer(),
       body: SafeArea(
         child: Column(
           children: [
             AppBanner(
+              onMenuPressed: () {
+                _scaffoldKey.currentState?.openDrawer();
+              },
               onSettingsPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -92,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           context,
                           title: 'Sorumluluk Duvarı',
                           icon: Icons.people_outline,
-                          color: AppColors.secondaryTextLight,
+                          color: AppColors.primary,
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
@@ -113,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           'Diş Fırçaları Kullanım Durumları',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.textLight,
+                                // color: AppColors.textLight, // Removed to use theme color
                               ),
                         ),
                         const SizedBox(height: 12),
@@ -166,8 +172,8 @@ class _HomeScreenState extends State<HomeScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Colors.white,
-                Colors.grey.shade50,
+                Theme.of(context).cardTheme.color ?? Colors.white,
+                Theme.of(context).cardTheme.color?.withOpacity(0.9) ?? Colors.grey.shade50,
               ],
             ),
           ),
@@ -192,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textLight,
+                        color: Theme.of(context).textTheme.titleMedium?.color,
                       ),
                 ),
               ),

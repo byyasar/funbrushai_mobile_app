@@ -27,7 +27,7 @@ class WeeklyStarsTable extends StatelessWidget {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -69,19 +69,19 @@ class WeeklyStarsTable extends StatelessWidget {
             },
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
-              const TableRow(
+              TableRow(
                 children: [
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Text('Dönem', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                    child: Text('Dönem', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyMedium?.color)),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Center(child: Text('Yıldızlar', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey))),
+                    child: Center(child: Text('Yıldızlar', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyMedium?.color))),
                   ),
                 ],
               ),
-              ...periods.map((period) => _buildPeriodRow(period)),
+              ...periods.map((period) => _buildPeriodRow(context, period)),
             ],
           ),
         ],
@@ -89,14 +89,17 @@ class WeeklyStarsTable extends StatelessWidget {
     );
   }
 
-  TableRow _buildPeriodRow(_PeriodData period) {
+  TableRow _buildPeriodRow(BuildContext context, _PeriodData period) {
     return TableRow(
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Text(
             '${period.startDay}-${period.endDay} ${DateFormat('MMMM', 'tr').format(month)}',
-            style: const TextStyle(fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+            ),
           ),
         ),
         Padding(
@@ -118,7 +121,7 @@ class WeeklyStarsTable extends StatelessWidget {
                   break;
                 case StarStatus.none:
                   icon = Icons.star_border;
-                  color = Colors.black;
+                  color = Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black;
                   break;
               }
 

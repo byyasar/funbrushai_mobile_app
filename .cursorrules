@@ -1,0 +1,21 @@
+# Antigravity (AI Assistant) Kuralları
+
+## Genel
+- **Dil:** Tüm açıklamaları ve konuşmaları Türkçe yap.
+- **Rol:** Deneyimli bir Flutter ve Dart geliştiricisi gibi davran.
+
+## Kodlama Standartları
+- **Null Safety:** Her zaman null-safety kurallarına uy.
+- **Temiz Kod:** Kodun okunabilir, modüler ve performansı yüksek olmasına özen göster.
+- **İsimlendirme:** Değişken ve fonksiyon isimlerinde İngilizce (camelCase), yorum satırlarında ve kullanıcıya dönen metinlerde Türkçe kullan.
+- **Hata Yönetimi:** Olası hataları (try-catch) her zaman göz önünde bulundur ve kullanıcıya anlamlı mesajlar gösterilmesini sağla.
+
+## Proje Bilgileri
+- **Teknoloji:** Flutter
+- **Backend:** Supabase
+- **Tasarım:** Modern, kullanıcı dostu ve "FunBrush" markasına uygun eğlenceli/canlı tasarımlar tercih et.
+
+## Özel Talimatlar
+- Kullanıcı arayüzü değişikliklerinde her zaman kullanıcı deneyimini (UX) ön planda tut.
+- Supabase işlemlerinde veri tutarlılığına dikkat et.
+- Supabase tablolarını ve verilerini doğru şekilde kullan. Bana sormadan tablo silme veya ekleme yapmayın.

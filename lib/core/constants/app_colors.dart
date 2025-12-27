@@ -4,8 +4,12 @@ class AppColors {
   // Modern Vibrant Theme
   static const Color primary = Color(0xFF2979FF); // Vibrant Blue
   static const Color primaryLight = Color(0xFF40C4FF); // Cyan Accent
+  
+  // Dark Mode Primary
+  static const Color primaryDark = Color(0xFF0D47A1); // Deep Blue
+  static const Color primaryLightDark = Color(0xFF1565C0); // Dark Blue
   static const Color backgroundLight = Color(0xFFF5F7FA); // Very light grey/white
-  static const Color backgroundDark = Color(0xFF263238); // Dark Slate
+  static const Color backgroundDark = Color(0xFF102027); // Deep Blue Grey (Darker version of Slate)
   static const Color cardLight = Color(0xFFFFFFFF); // Pure White
   static const Color cardDark = Color(0xFF37474F); // Darker Slate
   static const Color textLight = Color(0xFF263238); // Dark Slate Grey

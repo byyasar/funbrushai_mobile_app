@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'core/providers/theme_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -23,7 +25,12 @@ Future<void> main() async {
     anonKey: SupabaseConstants.anonKey,
   );
 
-  runApp(const FunBrushAiApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: const FunBrushAiApp(),
+    ),
+  );
 }
 
 class FunBrushAiApp extends StatelessWidget {
@@ -36,7 +43,7 @@ class FunBrushAiApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: Provider.of<ThemeProvider>(context).themeMode,
       home: const HomeScreen(),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
