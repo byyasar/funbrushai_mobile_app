@@ -2,24 +2,56 @@ class Toothbrush {
   final String id;
   final String name; // Keeping for backward compatibility if needed, or can be derived
   final String fircaId;
+  final String? cihazId;
   final String userName;
   final int renewalPeriodDays;
   final DateTime startDate;
   final DateTime? renewalDate;
   final DateTime? expirationDate;
   final String? avatar;
+  final bool isActive;
 
   Toothbrush({
     required this.id,
     required this.name,
     required this.fircaId,
+    this.cihazId,
     required this.userName,
     required this.renewalPeriodDays,
     required this.startDate,
     this.renewalDate,
     this.expirationDate,
     this.avatar,
+    this.isActive = true,
   });
+
+  Toothbrush copyWith({
+    String? id,
+    String? name,
+    String? fircaId,
+    String? cihazId,
+    String? userName,
+    int? renewalPeriodDays,
+    DateTime? startDate,
+    DateTime? renewalDate,
+    DateTime? expirationDate,
+    String? avatar,
+    bool? isActive,
+  }) {
+    return Toothbrush(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      fircaId: fircaId ?? this.fircaId,
+      cihazId: cihazId ?? this.cihazId,
+      userName: userName ?? this.userName,
+      renewalPeriodDays: renewalPeriodDays ?? this.renewalPeriodDays,
+      startDate: startDate ?? this.startDate,
+      renewalDate: renewalDate ?? this.renewalDate,
+      expirationDate: expirationDate ?? this.expirationDate,
+      avatar: avatar ?? this.avatar,
+      isActive: isActive ?? this.isActive,
+    );
+  }
 
   factory Toothbrush.fromJson(Map<String, dynamic> json) {
     DateTime parseDate(String? dateStr) {
@@ -72,6 +104,7 @@ class Toothbrush {
       id: json['id'].toString(),
       name: '$fircaId - $userName', // Default display name logic
       fircaId: fircaId,
+      cihazId: json['cihaz_id']?.toString(),
       userName: userName,
       renewalPeriodDays: renewalPeriod,
       startDate: json['baslangic_tarihi'] != null 

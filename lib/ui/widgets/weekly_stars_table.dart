@@ -64,8 +64,8 @@ class WeeklyStarsTable extends StatelessWidget {
               horizontalInside: BorderSide(color: Colors.grey.shade200),
             ),
             columnWidths: const {
-              0: FlexColumnWidth(1.5),
-              1: FlexColumnWidth(2.5),
+              0: FlexColumnWidth(1.3),
+              1: FlexColumnWidth(2.7),
             },
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
@@ -126,11 +126,11 @@ class WeeklyStarsTable extends StatelessWidget {
               }
 
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 1.5),
                 child: Icon(
                   icon,
                   color: color,
-                  size: 24,
+                  size: 20,
                 ),
               );
             }).toList(),
@@ -146,7 +146,7 @@ class WeeklyStarsTable extends StatelessWidget {
     
     int currentDay = 1;
     while (currentDay <= daysInMonth) {
-      int endDay = currentDay + 4; // 5-day period
+      int endDay = currentDay + 6; // 7-day period
       if (endDay > daysInMonth) endDay = daysInMonth;
 
       final dailyStatus = <StarStatus>[];

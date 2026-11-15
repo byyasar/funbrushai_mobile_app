@@ -26,9 +26,10 @@ class _ToothbrushCardScreenState extends State<ToothbrushCardScreen> {
 
   Future<void> _loadData() async {
     final toothbrushes = await SupabaseService().getAllToothbrushes();
+    final activeToothbrushes = toothbrushes.where((b) => b.isActive).toList();
     if (mounted) {
       setState(() {
-        _toothbrushes = toothbrushes;
+        _toothbrushes = activeToothbrushes;
         _isLoading = false;
       });
     }

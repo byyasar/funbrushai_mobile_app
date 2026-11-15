@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/providers/theme_provider.dart';
+import '../screens/family_leaderboard_screen.dart';
+import '../screens/device_settings_screen.dart';
 
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
+  final VoidCallback? onRefreshNeeded;
+
+  const AppDrawer({super.key, this.onRefreshNeeded});
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +63,36 @@ class AppDrawer extends StatelessWidget {
                   title: const Text('Ana Sayfa'),
                   onTap: () {
                     Navigator.pop(context); // Close drawer
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.settings_input_composite, color: AppColors.primary),
+                  title: const Text('Cihaz Ayarları'),
+                  subtitle: const Text('Cihaz ID & Veritabanı', style: TextStyle(fontSize: 11)),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  onTap: () async {
+                    Navigator.pop(context); // Close drawer
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const DeviceSettingsScreen(),
+                      ),
+                    );
+                    onRefreshNeeded?.call();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.emoji_events, color: Colors.amber),
+                  title: const Text('Aile Skor Tablosu'),
+                  subtitle: const Text('Haftanın Hijyen Lideri 👑', style: TextStyle(fontSize: 11, color: Colors.amber)),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  onTap: () async {
+                    Navigator.pop(context); // Close drawer
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const FamilyLeaderboardScreen(),
+                      ),
+                    );
+                    onRefreshNeeded?.call();
                   },
                 ),
                 // Theme Toggle

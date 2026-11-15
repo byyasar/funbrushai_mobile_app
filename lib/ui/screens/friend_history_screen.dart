@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/providers/mascot_provider.dart';
 import '../../data/models/social_user.dart';
 import '../../data/services/supabase_service.dart';
 import '../widgets/calendar_day_tile.dart';
 import '../widgets/day_detail_drawer.dart';
 import '../widgets/weekly_stars_table.dart';
 import '../widgets/app_banner.dart';
+import '../widgets/mascot/mascot_home_card.dart';
 
 class FriendHistoryScreen extends StatefulWidget {
   final SocialUser user;
@@ -35,6 +38,12 @@ class _FriendHistoryScreenState extends State<FriendHistoryScreen> {
       brushId: widget.user.brushId,
       month: _currentMonth,
     );
+
+    // Maskotu bu kişinin veritabanındaki fırçalama geçmişiyle senkronize et
+    final allRecords = await SupabaseService().getAllRecordsForBrush(widget.user.brushId);
+    if (mounted) {
+      context.read<MascotProvider>().syncWithBrushingRecords(allRecords);
+    }
 
     final Map<int, Map<String, dynamic>> newData = {};
 
@@ -158,6 +167,14 @@ class _FriendHistoryScreenState extends State<FriendHistoryScreen> {
     return SingleChildScrollView( // Added scroll view to fit content
       child: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+            child: MascotHomeCard(
+              userName: widget.user.name,
+              userAvatarUrl: widget.user.avatarUrl,
+            ),
+          ),
+          const SizedBox(height: 8),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
             padding: const EdgeInsets.all(16),
