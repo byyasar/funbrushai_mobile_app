@@ -22,21 +22,39 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
   ]);
 
-  await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint('dotenv load error: $e');
+  }
   
   // Bypass SSL certificate verification for development
   HttpOverrides.global = MyHttpOverrides();
 
-  await initializeDateFormatting('tr', null);
+  try {
+    await initializeDateFormatting('tr', null);
+  } catch (e) {
+    debugPrint('initializeDateFormatting error: $e');
+  }
 
   // Load custom database connection if configured by the user
-  final dbUrl = await DeviceConfigService.getDbUrl();
-  final apiKey = await DeviceConfigService.getApiKey();
+  String dbUrl = '';
+  String apiKey = '';
+  try {
+    dbUrl = await DeviceConfigService.getDbUrl();
+    apiKey = await DeviceConfigService.getApiKey();
+  } catch (e) {
+    debugPrint('DeviceConfigService error: $e');
+  }
 
-  await Supabase.initialize(
-    url: dbUrl.isNotEmpty ? dbUrl : SupabaseConstants.url,
-    anonKey: apiKey.isNotEmpty ? apiKey : SupabaseConstants.anonKey,
-  );
+  try {
+    await Supabase.initialize(
+      url: dbUrl.isNotEmpty ? dbUrl : SupabaseConstants.url,
+      anonKey: apiKey.isNotEmpty ? apiKey : SupabaseConstants.anonKey,
+    );
+  } catch (e) {
+    debugPrint('Supabase initialize error: $e');
+  }
 
   runApp(
     MultiProvider(
