@@ -1,22 +1,47 @@
 PODS:
   - Flutter (1.0.0)
+  - flutter_lame (1.0.0):
+    - Flutter
+  - flutter_sound (9.30.0):
+    - Flutter
+    - flutter_sound_core (= 9.30.0)
+  - flutter_sound_core (9.30.0)
+  - flutter_tts (0.0.1):
+    - Flutter
   - printing (1.0.0):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - flutter_lame (from `.symlinks/plugins/flutter_lame/ios`)
+  - flutter_sound (from `.symlinks/plugins/flutter_sound/ios`)
+  - flutter_tts (from `.symlinks/plugins/flutter_tts/ios`)
   - printing (from `.symlinks/plugins/printing/ios`)
+
+SPEC REPOS:
+  trunk:
+    - flutter_sound_core
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  flutter_lame:
+    :path: ".symlinks/plugins/flutter_lame/ios"
+  flutter_sound:
+    :path: ".symlinks/plugins/flutter_sound/ios"
+  flutter_tts:
+    :path: ".symlinks/plugins/flutter_tts/ios"
   printing:
     :path: ".symlinks/plugins/printing/ios"
 
 SPEC CHECKSUMS:
   Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
+  flutter_lame: bee3d284f5ca264d3ab4c0c898ce219ddfeba03d
+  flutter_sound: d95194f6476c9ad211d22b3a414d852c12c7ca44
+  flutter_sound_core: 7f2626d249d3a57bfa6da892ef7e22d234482c1a
+  flutter_tts: 35ac3c7d42412733e795ea96ad2d7e05d0a75113
   printing: 54ff03f28fe9ba3aa93358afb80a8595a071dd07
 
-PODFILE CHECKSUM: ba0d7af98d1a0db7cbf744edd0331fd4de934cd6
+PODFILE CHECKSUM: 05f7b01c49faabe6ba97f8687c74026b55606b7c
 
 COCOAPODS: 1.16.2

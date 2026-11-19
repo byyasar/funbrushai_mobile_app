@@ -3,13 +3,17 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  audioplayers_linux
   file_selector_linux
+  flutter_sound
   gtk
   printing
+  record_linux
   url_launcher_linux
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
+  flutter_lame
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

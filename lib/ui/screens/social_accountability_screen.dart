@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../core/constants/app_colors.dart';
 import '../../data/models/brushing_record.dart';
 import '../../data/models/social_user.dart';
@@ -285,7 +284,6 @@ class _SocialAccountabilityScreenState extends State<SocialAccountabilityScreen>
                 // - If no record AND date is today -> Neutral/Pending (Grey)
                 
                 // Note: "date is in the past" means strictly before today's start of day
-                final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
                 final isPast = date.isBefore(DateTime(now.year, now.month, now.day));
 
                 Color bgColor;

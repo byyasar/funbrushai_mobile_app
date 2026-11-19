@@ -43,6 +43,12 @@
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Bu uygulama ses kaydetmek ve TTS seslerini MP3 olarak kaydetmek için mikrofon erişimine ihtiyaç duyar.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Bu uygulama kaydedilen ses dosyalarını paylaşmak için fotoğraf kütüphanesine erişime ihtiyaç duyar.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Bu uygulama kaydedilen MP3 dosyalarını fotoğraf kütüphanesine kaydetmek için erişime ihtiyaç duyar.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

@@ -13,6 +13,11 @@ import UIKit
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
 
+    // Register TTS Save Plugin
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "TtsSavePlugin") {
+      TtsSavePlugin.register(with: registrar)
+    }
+
     let themeChannel = FlutterMethodChannel(name: "com.funbrushai.app/theme",
                                           binaryMessenger: engineBridge.applicationRegistrar.messenger())
     themeChannel.setMethodCallHandler({

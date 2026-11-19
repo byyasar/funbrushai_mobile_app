@@ -1,0 +1,103 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Flutter Run iOS Simulator",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"ios"
+			],
+			"isBackground": true,
+			"problemMatcher": [
+				"$dart"
+			]
+		},
+		{
+			"label": "Flutter Run iPhone 16e",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"B55F3C21-0EEB-4345-82F6-9B98614C9B3A"
+			],
+			"isBackground": true,
+			"problemMatcher": [
+				"$dart"
+			]
+		},
+		{
+			"label": "Flutter Build iOS",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"build",
+				"ios",
+				"--no-codesign"
+			]
+		},
+		{
+			"label": "Flutter Restart iPhone 16e",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"B55F3C21-0EEB-4345-82F6-9B98614C9B3A"
+			],
+			"isBackground": true
+		},
+		{
+			"label": "Flutter Pub Get",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"pub",
+				"get"
+			]
+		},
+		{
+			"label": "Flutter Run Simulator MP3",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"B55F3C21-0EEB-4345-82F6-9B98614C9B3A"
+			],
+			"isBackground": true
+		},
+		{
+			"label": "Flutter Devices",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"devices"
+			]
+		},
+		{
+			"label": "Flutter Run Android Redmi Note 8 Pro",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"kjmnucknau9d5tqs"
+			],
+			"isBackground": true
+		},
+		{
+			"label": "Flutter Build Debug APK",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"build",
+				"apk",
+				"--debug"
+			]
+		}
+	]
+}
