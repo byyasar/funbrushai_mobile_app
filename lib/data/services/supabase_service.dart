@@ -430,4 +430,34 @@ class SupabaseService {
       throw e;
     }
   }
+
+  Future<void> updateToothbrushMascotName({
+    required String brushId,
+    required String mascotName,
+    String? id,
+  }) async {
+    final deviceId = await _getDeviceId();
+    try {
+      if (id != null && id.isNotEmpty) {
+        await _client
+            .from('dis_fircalari')
+            .update({'maskot_adi': mascotName})
+            .eq('id', id);
+      } else {
+        var query = _client
+            .from('dis_fircalari')
+            .update({'maskot_adi': mascotName})
+            .eq('firca_id', brushId);
+
+        if (deviceId.isNotEmpty) {
+          query = query.eq('cihaz_id', deviceId);
+        }
+
+        await query;
+      }
+      debugPrint('Updated mascot name for brush $brushId to $mascotName');
+    } catch (e) {
+      debugPrint('Error updating mascot name in Supabase: $e');
+    }
+  }
 }

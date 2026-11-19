@@ -9,6 +9,7 @@ class Toothbrush {
   final DateTime? renewalDate;
   final DateTime? expirationDate;
   final String? avatar;
+  final String? mascotName;
   final bool isActive;
 
   Toothbrush({
@@ -22,6 +23,7 @@ class Toothbrush {
     this.renewalDate,
     this.expirationDate,
     this.avatar,
+    this.mascotName,
     this.isActive = true,
   });
 
@@ -36,6 +38,7 @@ class Toothbrush {
     DateTime? renewalDate,
     DateTime? expirationDate,
     String? avatar,
+    String? mascotName,
     bool? isActive,
   }) {
     return Toothbrush(
@@ -49,6 +52,7 @@ class Toothbrush {
       renewalDate: renewalDate ?? this.renewalDate,
       expirationDate: expirationDate ?? this.expirationDate,
       avatar: avatar ?? this.avatar,
+      mascotName: mascotName ?? this.mascotName,
       isActive: isActive ?? this.isActive,
     );
   }
@@ -113,6 +117,7 @@ class Toothbrush {
       renewalDate: parseOptionalDate(json['yenillenme_tarihi'] ?? json['yenilenme_tarihi']),
       expirationDate: parseOptionalDate(json['son_kullanma_tarihi']),
       avatar: json['avatar']?.toString(),
+      mascotName: json['maskot_adi']?.toString(),
     );
   }
 }

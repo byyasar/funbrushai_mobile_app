@@ -4,7 +4,6 @@ import '../../core/constants/app_colors.dart';
 import '../../core/providers/theme_provider.dart';
 import '../screens/family_leaderboard_screen.dart';
 import '../screens/device_settings_screen.dart';
-import '../screens/audio_test_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   final VoidCallback? onRefreshNeeded;
@@ -94,20 +93,6 @@ class AppDrawer extends StatelessWidget {
                       ),
                     );
                     onRefreshNeeded?.call();
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.mic, color: AppColors.primary),
-                  title: const Text('Ses Testi'),
-                  subtitle: const Text('Kaydet, TTS→MP3, Oynat', style: TextStyle(fontSize: 11)),
-                  trailing: const Icon(Icons.chevron_right, size: 20),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const AudioTestScreen(),
-                      ),
-                    );
                   },
                 ),
                 // Theme Toggle

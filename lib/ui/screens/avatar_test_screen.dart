@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../data/models/toothbrush.dart';
 import '../../data/services/supabase_service.dart';
 
@@ -60,6 +62,18 @@ class _AvatarTestScreenState extends State<AvatarTestScreen> {
         setState(() {
           _imageFile = File(photo.path);
         });
+      }
+    } on PlatformException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Kamera erişim hatası: ${e.message ?? e.code}'),
+            action: SnackBarAction(
+              label: 'Ayarlar',
+              onPressed: () => openAppSettings(),
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {

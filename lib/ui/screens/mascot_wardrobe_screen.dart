@@ -8,7 +8,14 @@ import '../widgets/app_banner.dart';
 import '../widgets/mascot/mascot_view.dart';
 
 class MascotWardrobeScreen extends StatefulWidget {
-  const MascotWardrobeScreen({super.key});
+  final String? brushId;
+  final String? userName;
+
+  const MascotWardrobeScreen({
+    super.key,
+    this.brushId,
+    this.userName,
+  });
 
   @override
   State<MascotWardrobeScreen> createState() => _MascotWardrobeScreenState();
@@ -26,9 +33,16 @@ class _MascotWardrobeScreenState extends State<MascotWardrobeScreen> with Single
 
   Future<void> _syncMascotWithLatestRecords() async {
     try {
-      final records = await SupabaseService().getAllRecordsForDevice();
-      if (mounted && records.isNotEmpty) {
-        context.read<MascotProvider>().syncWithBrushingRecords(records);
+      if (widget.brushId != null && widget.brushId!.isNotEmpty) {
+        final records = await SupabaseService().getAllRecordsForBrush(widget.brushId!);
+        if (mounted && records.isNotEmpty) {
+          context.read<MascotProvider>().syncWithBrushingRecords(records, brushId: widget.brushId);
+        }
+      } else {
+        final records = await SupabaseService().getAllRecordsForDevice();
+        if (mounted && records.isNotEmpty) {
+          context.read<MascotProvider>().syncWithBrushingRecords(records);
+        }
       }
     } catch (e) {
       debugPrint('Error syncing mascot in wardrobe: $e');
@@ -44,7 +58,7 @@ class _MascotWardrobeScreenState extends State<MascotWardrobeScreen> with Single
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<MascotProvider>();
-    final mascot = provider.mascot;
+    final mascot = provider.getMascotForBrush(widget.brushId);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -52,7 +66,9 @@ class _MascotWardrobeScreenState extends State<MascotWardrobeScreen> with Single
         child: Column(
           children: [
             AppBanner(
-              title: '${mascot.customName} Odası',
+              title: widget.userName != null && widget.userName!.isNotEmpty
+                  ? '${mascot.customName} (${widget.userName})'
+                  : '${mascot.customName} Odası',
               showBackButton: true,
             ),
             Expanded(
@@ -193,7 +209,7 @@ class _MascotWardrobeScreenState extends State<MascotWardrobeScreen> with Single
     MascotItemCategory category,
   ) {
     final items = MascotItem.allItems.where((i) => i.category == category).toList();
-    final mascot = provider.mascot;
+    final mascot = provider.getMascotForBrush(widget.brushId);
 
     return GridView.builder(
       physics: const BouncingScrollPhysics(),
@@ -303,7 +319,7 @@ class _MascotWardrobeScreenState extends State<MascotWardrobeScreen> with Single
                   ),
                   onPressed: isUnlocked
                       ? () {
-                          provider.equipItem(item);
+                          provider.equipItem(item, brushId: widget.brushId);
                         }
                       : null,
                   child: Text(

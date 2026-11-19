@@ -39,6 +39,7 @@ class ToothbrushLifespanCard extends StatelessWidget {
           name: toothbrush.userName,
           avatarUrl: toothbrush.avatar ?? '',
           brushId: toothbrush.fircaId,
+          mascotName: toothbrush.mascotName,
         );
         Navigator.of(context).push(
           MaterialPageRoute(

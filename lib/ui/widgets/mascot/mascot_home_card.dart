@@ -9,19 +9,23 @@ import 'mascot_view.dart';
 class MascotHomeCard extends StatelessWidget {
   final String? userName;
   final String? userAvatarUrl;
+  final String? brushId;
 
   const MascotHomeCard({
     super.key,
     this.userName,
     this.userAvatarUrl,
+    this.brushId,
   });
 
-  void _showNameDialog(BuildContext context, MascotProvider provider) {
-    final controller = TextEditingController(text: provider.mascot.customName);
+  void _showNameDialog(BuildContext context, MascotProvider provider, MascotModel mascot) {
+    final controller = TextEditingController(text: mascot.customName);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Diş Dostuna İsim Ver'),
+        title: Text(userName != null && userName!.isNotEmpty
+            ? '$userName İçin Diş Dostuna İsim Ver'
+            : 'Diş Dostuna İsim Ver'),
         content: TextField(
           controller: controller,
           decoration: const InputDecoration(
@@ -37,7 +41,7 @@ class MascotHomeCard extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              provider.setCustomName(controller.text);
+              provider.setCustomName(controller.text, brushId: brushId);
               Navigator.pop(ctx);
             },
             child: const Text('Kaydet'),
@@ -50,7 +54,7 @@ class MascotHomeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<MascotProvider>();
-    final mascot = provider.mascot;
+    final mascot = provider.getMascotForBrush(brushId);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     Color statusColor;
@@ -107,7 +111,7 @@ class MascotHomeCard extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.edit, size: 16),
                     visualDensity: VisualDensity.compact,
-                    onPressed: () => _showNameDialog(context, provider),
+                    onPressed: () => _showNameDialog(context, provider, mascot),
                     tooltip: 'İsmi Değiştir',
                   ),
                 ],
@@ -230,7 +234,10 @@ class MascotHomeCard extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const MascotWardrobeScreen(),
+                    builder: (_) => MascotWardrobeScreen(
+                      brushId: brushId,
+                      userName: userName,
+                    ),
                   ),
                 );
               },

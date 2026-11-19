@@ -41,8 +41,13 @@ class _FriendHistoryScreenState extends State<FriendHistoryScreen> {
 
     // Maskotu bu kişinin veritabanındaki fırçalama geçmişiyle senkronize et
     final allRecords = await SupabaseService().getAllRecordsForBrush(widget.user.brushId);
+    final brushDetails = await SupabaseService().getToothbrushDetails(widget.user.brushId);
     if (mounted) {
-      context.read<MascotProvider>().syncWithBrushingRecords(allRecords);
+      context.read<MascotProvider>().loadForBrush(
+        widget.user.brushId,
+        records: allRecords,
+        initialName: brushDetails?.mascotName ?? widget.user.mascotName,
+      );
     }
 
     final Map<int, Map<String, dynamic>> newData = {};
@@ -172,6 +177,7 @@ class _FriendHistoryScreenState extends State<FriendHistoryScreen> {
             child: MascotHomeCard(
               userName: widget.user.name,
               userAvatarUrl: widget.user.avatarUrl,
+              brushId: widget.user.brushId,
             ),
           ),
           const SizedBox(height: 8),

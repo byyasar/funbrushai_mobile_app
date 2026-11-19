@@ -4,33 +4,74 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/models/mascot_item.dart';
 import '../../data/models/mascot_model.dart';
 import '../../data/models/brushing_record.dart';
+import '../../data/services/supabase_service.dart';
 
 class MascotProvider extends ChangeNotifier {
-  static const String _storageKey = 'funbrush_mascot_data_v1';
+  static const String _defaultStorageKey = 'funbrush_mascot_data_v1';
   
-  MascotModel _mascot = const MascotModel();
+  String? _activeBrushId;
+  final Map<String, MascotModel> _mascotsByBrush = {};
   List<MascotItem> _recentUnlockedItems = [];
 
-  MascotModel get mascot => _mascot;
+  String? get activeBrushId => _activeBrushId;
+  MascotModel get mascot => getMascotForBrush(_activeBrushId);
   List<MascotItem> get recentUnlockedItems => _recentUnlockedItems;
 
   MascotProvider() {
     _loadFromPrefs();
   }
 
+  String _sanitizeKey(String? brushId) {
+    if (brushId == null || brushId.trim().isEmpty) {
+      return 'default';
+    }
+    return brushId.trim();
+  }
+
+  String _storageKey(String sanitizedKey) {
+    if (sanitizedKey == 'default') {
+      return _defaultStorageKey;
+    }
+    return '${_defaultStorageKey}_$sanitizedKey';
+  }
+
+  MascotModel getMascotForBrush(String? brushId) {
+    final key = _sanitizeKey(brushId);
+    return _mascotsByBrush[key] ?? const MascotModel();
+  }
+
+  void setActiveBrushId(String? brushId) {
+    _activeBrushId = brushId;
+    notifyListeners();
+  }
+
   Future<void> _loadFromPrefs() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final jsonString = prefs.getString(_storageKey);
-      if (jsonString != null) {
-        final Map<String, dynamic> data = jsonDecode(jsonString);
-        _mascot = MascotModel.fromJson(data);
+
+      // Varsayılan anahtarı yükle
+      final defaultJson = prefs.getString(_defaultStorageKey);
+      if (defaultJson != null) {
+        final Map<String, dynamic> data = jsonDecode(defaultJson);
+        _mascotsByBrush['default'] = MascotModel.fromJson(data);
       } else {
-        // Varsayılan maskot
-        _mascot = MascotModel(
+        _mascotsByBrush['default'] = MascotModel(
           lastBrushedAt: DateTime.now().subtract(const Duration(hours: 4)),
         );
       }
+
+      // Kullanıcı/fırça bazlı anahtarları tara ve belleğe yükle
+      final prefix = '${_defaultStorageKey}_';
+      final allKeys = prefs.getKeys().where((k) => k.startsWith(prefix));
+      for (final storageKey in allKeys) {
+        final jsonStr = prefs.getString(storageKey);
+        if (jsonStr != null) {
+          final Map<String, dynamic> data = jsonDecode(jsonStr);
+          final brushKey = storageKey.substring(prefix.length);
+          _mascotsByBrush[brushKey] = MascotModel.fromJson(data);
+        }
+      }
+
       _recalculateStats();
       notifyListeners();
     } catch (e) {
@@ -38,21 +79,69 @@ class MascotProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _saveToPrefs() async {
+  Future<void> _saveToPrefs(String key) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final jsonString = jsonEncode(_mascot.toJson());
-      await prefs.setString(_storageKey, jsonString);
+      final target = _mascotsByBrush[key];
+      if (target != null) {
+        final jsonString = jsonEncode(target.toJson());
+        await prefs.setString(_storageKey(key), jsonString);
+      }
     } catch (e) {
-      debugPrint('Error saving mascot data: $e');
+      debugPrint('Error saving mascot data for $key: $e');
+    }
+  }
+
+  /// Belirli bir fırça için maskotu SharedPreferences veya varsayılandan yükler
+  Future<void> loadForBrush(String? brushId, {List<BrushingRecord>? records, String? initialName}) async {
+    _activeBrushId = brushId;
+    final key = _sanitizeKey(brushId);
+
+    if (!_mascotsByBrush.containsKey(key)) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final jsonString = prefs.getString(_storageKey(key));
+        if (jsonString != null) {
+          final Map<String, dynamic> data = jsonDecode(jsonString);
+          _mascotsByBrush[key] = MascotModel.fromJson(data);
+        } else {
+          _mascotsByBrush[key] = MascotModel(
+            customName: (initialName != null && initialName.trim().isNotEmpty) ? initialName.trim() : 'Pırıl Diş',
+            lastBrushedAt: DateTime.now().subtract(const Duration(hours: 4)),
+          );
+        }
+      } catch (e) {
+        debugPrint('Error loading mascot for brush $brushId: $e');
+        _mascotsByBrush[key] = const MascotModel();
+      }
+    }
+
+    // Veritabanından gelen isim varsa ve yerelde farklıysa güncelle
+    if (initialName != null && initialName.trim().isNotEmpty) {
+      final current = getMascotForBrush(brushId);
+      if (current.customName != initialName.trim()) {
+        _mascotsByBrush[key] = current.copyWith(customName: initialName.trim());
+        await _saveToPrefs(key);
+      }
+    }
+
+    if (records != null) {
+      await syncWithBrushingRecords(records, brushId: brushId);
+    } else {
+      _recalculateStats(brushId: brushId);
+      notifyListeners();
     }
   }
 
   /// Zaman geçtikçe mutluluk ve hijyeni doğal olarak azaltan hesaplama
-  void _recalculateStats() {
-    if (_mascot.lastBrushedAt == null) return;
+  void _recalculateStats({String? brushId}) {
+    final targetBrushId = brushId ?? _activeBrushId;
+    final key = _sanitizeKey(targetBrushId);
+    final targetMascot = getMascotForBrush(targetBrushId);
+
+    if (targetMascot.lastBrushedAt == null) return;
     
-    final elapsedHours = DateTime.now().difference(_mascot.lastBrushedAt!).inMinutes / 60.0;
+    final elapsedHours = DateTime.now().difference(targetMascot.lastBrushedAt!).inMinutes / 60.0;
     
     double calculatedHygiene;
     if (elapsedHours <= 2.0) {
@@ -65,7 +154,7 @@ class MascotProvider extends ChangeNotifier {
       calculatedHygiene = (33.0 - ((elapsedHours - 20.0) * 1.0)).clamp(10.0, 33.0);
     }
 
-    double calculatedHappiness = _mascot.happiness.toDouble();
+    double calculatedHappiness = targetMascot.happiness.toDouble();
     if (elapsedHours > 8.0) {
       calculatedHappiness = calculatedHappiness - ((elapsedHours - 8.0) * 2.5);
     }
@@ -73,16 +162,24 @@ class MascotProvider extends ChangeNotifier {
       calculatedHappiness -= 10.0;
     }
 
-    _mascot = _mascot.copyWith(
+    _mascotsByBrush[key] = targetMascot.copyWith(
       hygiene: calculatedHygiene.round().clamp(10, 100),
       happiness: calculatedHappiness.round().clamp(10, 100),
     );
   }
 
   /// Veritabanındaki gerçek fırçalama kayıtlarına göre maskot durumunu senkronize eder
-  Future<void> syncWithBrushingRecords(List<BrushingRecord> records) async {
+  Future<void> syncWithBrushingRecords(List<BrushingRecord> records, {String? brushId}) async {
+    final targetBrushId = brushId ?? _activeBrushId;
+    final key = _sanitizeKey(targetBrushId);
+
+    if (!_mascotsByBrush.containsKey(key)) {
+      await loadForBrush(targetBrushId);
+    }
+    final currentMascot = getMascotForBrush(targetBrushId);
+
     if (records.isEmpty) {
-      _recalculateStats();
+      _recalculateStats(brushId: targetBrushId);
       notifyListeners();
       return;
     }
@@ -126,7 +223,7 @@ class MascotProvider extends ChangeNotifier {
     final totalXp = sortedRecords.length * 100;
 
     // Kilit açma kontrolü
-    final List<String> currentUnlocked = List.from(_mascot.unlockedItemIds);
+    final List<String> currentUnlocked = List.from(currentMascot.unlockedItemIds);
     for (final item in MascotItem.allItems) {
       if (!currentUnlocked.contains(item.id)) {
         final streakCondition = item.requiredStreak == 0 || streak >= item.requiredStreak;
@@ -138,11 +235,9 @@ class MascotProvider extends ChangeNotifier {
     }
 
     // --- TEMİZLİK (HİJYEN) HESABI ---
-    // Son fırçalamadan beri geçen süre (saat cinsinden)
     final elapsedMinutes = now.difference(lastBrushedAt).inMinutes;
     final elapsedHours = elapsedMinutes / 60.0;
 
-    // Fırçalama süresi kalitesi (120 sn ideal 2 dk hedefi)
     double baseHygiene = 100.0;
     if (lastRecord.durationSeconds > 0 && lastRecord.durationSeconds < 60) {
       baseHygiene = 70.0;
@@ -165,7 +260,6 @@ class MascotProvider extends ChangeNotifier {
     final int finalHygiene = calculatedHygiene.round().clamp(10, 100);
 
     // --- MUTLULUK HESABI ---
-    // Bugün yapılan fırçalama sayısı
     final today = DateTime(now.year, now.month, now.day);
     final todayRecords = sortedRecords.where((r) {
       final d = r.createdAt.toLocal();
@@ -176,40 +270,32 @@ class MascotProvider extends ChangeNotifier {
     double calculatedHappiness = 40.0;
 
     if (todayCount >= 2) {
-      // Günde 2 kez fırçalama hedefi tamamlandı: Çok mutlu!
       calculatedHappiness = 95.0;
     } else if (todayCount == 1) {
-      // Bugün 1 kez fırçalanmış: İyi
       calculatedHappiness = 75.0;
       if (elapsedHours <= 4.0) {
         calculatedHappiness += 10.0;
       }
     } else {
-      // Bugün henüz hiç fırçalanmadı
       if (elapsedHours <= 14.0) {
-        // Dün gece fırçalanmış, sabah henüz fırçalanmadı
         calculatedHappiness = 55.0;
       } else if (elapsedHours <= 24.0) {
         calculatedHappiness = 40.0;
       } else {
-        // 1 günden fazladır fırçalanmamış
         calculatedHappiness = 20.0;
       }
     }
 
-    // Seri (streak) bonusu
     if (streak >= 7) {
       calculatedHappiness += 10.0;
     } else if (streak >= 3) {
       calculatedHappiness += 5.0;
     }
 
-    // Son fırçalama 2 dakika tam yapıldıysa ekstra neşe
     if (lastRecord.durationSeconds >= 120) {
       calculatedHappiness += 5.0;
     }
 
-    // Temizlik barı çok düşükse maskotun keyfi kaçar
     if (finalHygiene <= 25) {
       calculatedHappiness -= 20.0;
     } else if (finalHygiene <= 45) {
@@ -218,7 +304,8 @@ class MascotProvider extends ChangeNotifier {
 
     final int finalHappiness = calculatedHappiness.round().clamp(10, 100);
 
-    _mascot = _mascot.copyWith(
+    // Kişiye özel customName korunur
+    _mascotsByBrush[key] = currentMascot.copyWith(
       lastBrushedAt: lastBrushedAt,
       streakDays: streak > 0 ? streak : 1,
       xp: totalXp,
@@ -227,28 +314,32 @@ class MascotProvider extends ChangeNotifier {
       unlockedItemIds: currentUnlocked,
     );
 
-    await _saveToPrefs();
+    await _saveToPrefs(key);
     notifyListeners();
   }
 
   /// Çocuk dişini fırçaladığında çağrılır (Tamagotchi besleme/temizleme)
-  Future<List<MascotItem>> recordBrushing() async {
-    final now = DateTime.now();
-    int newStreak = _mascot.streakDays;
+  Future<List<MascotItem>> recordBrushing({String? brushId}) async {
+    final targetBrushId = brushId ?? _activeBrushId;
+    final key = _sanitizeKey(targetBrushId);
+    final currentMascot = getMascotForBrush(targetBrushId);
 
-    if (_mascot.lastBrushedAt != null) {
-      final diffDays = now.difference(_mascot.lastBrushedAt!).inDays;
+    final now = DateTime.now();
+    int newStreak = currentMascot.streakDays;
+
+    if (currentMascot.lastBrushedAt != null) {
+      final diffDays = now.difference(currentMascot.lastBrushedAt!).inDays;
       if (diffDays == 1) {
         newStreak += 1;
       } else if (diffDays > 2) {
-        newStreak = 1; // Seri bozuldu
+        newStreak = 1;
       }
     } else {
       newStreak = 1;
     }
 
-    final newXp = _mascot.xp + 100;
-    final List<String> currentUnlocked = List.from(_mascot.unlockedItemIds);
+    final newXp = currentMascot.xp + 100;
+    final List<String> currentUnlocked = List.from(currentMascot.unlockedItemIds);
     final List<MascotItem> newlyUnlocked = [];
 
     // Kilit açma kontrolü
@@ -264,7 +355,7 @@ class MascotProvider extends ChangeNotifier {
     }
 
     _recentUnlockedItems = newlyUnlocked;
-    _mascot = _mascot.copyWith(
+    _mascotsByBrush[key] = currentMascot.copyWith(
       happiness: 100,
       hygiene: 100,
       xp: newXp,
@@ -273,37 +364,64 @@ class MascotProvider extends ChangeNotifier {
       unlockedItemIds: currentUnlocked,
     );
 
-    await _saveToPrefs();
+    await _saveToPrefs(key);
     notifyListeners();
     return newlyUnlocked;
   }
 
   /// Aksesuar kuşanma
-  Future<void> equipItem(MascotItem item) async {
-    if (!_mascot.unlockedItemIds.contains(item.id)) return;
+  Future<void> equipItem(MascotItem item, {String? brushId}) async {
+    final targetBrushId = brushId ?? _activeBrushId;
+    final key = _sanitizeKey(targetBrushId);
+    final currentMascot = getMascotForBrush(targetBrushId);
 
+    if (!currentMascot.unlockedItemIds.contains(item.id)) return;
+
+    MascotModel updated = currentMascot;
     switch (item.category) {
       case MascotItemCategory.hat:
-        _mascot = _mascot.copyWith(equippedHatId: item.id);
+        updated = currentMascot.copyWith(equippedHatId: item.id);
         break;
       case MascotItemCategory.costume:
-        _mascot = _mascot.copyWith(equippedCostumeId: item.id);
+        updated = currentMascot.copyWith(equippedCostumeId: item.id);
         break;
       case MascotItemCategory.tool:
-        _mascot = _mascot.copyWith(equippedToolId: item.id);
+        updated = currentMascot.copyWith(equippedToolId: item.id);
         break;
     }
 
-    await _saveToPrefs();
+    _mascotsByBrush[key] = updated;
+    await _saveToPrefs(key);
     notifyListeners();
   }
 
-  /// İsim değiştirme
-  Future<void> setCustomName(String name) async {
-    if (name.trim().isEmpty) return;
-    _mascot = _mascot.copyWith(customName: name.trim());
-    await _saveToPrefs();
+  /// İsim değiştirme (Kişiye/fırçaya özel ve Supabase ile senkronize)
+  Future<void> setCustomName(String name, {String? brushId}) async {
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty) return;
+    final targetBrushId = brushId ?? _activeBrushId;
+    final key = _sanitizeKey(targetBrushId);
+
+    if (!_mascotsByBrush.containsKey(key)) {
+      await loadForBrush(targetBrushId);
+    }
+
+    final currentMascot = getMascotForBrush(targetBrushId);
+    _mascotsByBrush[key] = currentMascot.copyWith(customName: trimmedName);
+    await _saveToPrefs(key);
     notifyListeners();
+
+    // Veritabanına kaydet
+    if (targetBrushId != null && targetBrushId.isNotEmpty && targetBrushId != 'default') {
+      try {
+        await SupabaseService().updateToothbrushMascotName(
+          brushId: targetBrushId,
+          mascotName: trimmedName,
+        );
+      } catch (e) {
+        debugPrint('Supabase mascot name update skipped or failed: $e');
+      }
+    }
   }
 
   void clearRecentUnlocked() {
