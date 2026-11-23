@@ -4,7 +4,6 @@ import '../../data/models/brushing_record.dart';
 import '../../data/models/social_user.dart';
 import '../../data/services/supabase_service.dart';
 import 'friend_history_screen.dart';
-import 'family_leaderboard_screen.dart';
 
 import '../widgets/app_banner.dart';
 
@@ -44,59 +43,6 @@ class _SocialAccountabilityScreenState extends State<SocialAccountabilityScreen>
             AppBanner(
               title: 'Sorumluluk Duvarı',
               showBackButton: true,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const FamilyLeaderboardScreen(),
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFFB300), Color(0xFFFF8F00)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.amber.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: const [
-                      Text('👑', style: TextStyle(fontSize: 24)),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Haftanın Hijyen Lideri',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                            ),
-                            Text(
-                              'Haftalık aile skor tablosunu gör ➔',
-                              style: TextStyle(color: Colors.white70, fontSize: 11),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(Icons.chevron_right, color: Colors.white),
-                    ],
-                  ),
-                ),
-              ),
             ),
             Expanded(
               child: _isLoading

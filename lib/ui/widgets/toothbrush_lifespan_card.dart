@@ -52,12 +52,20 @@ class ToothbrushLifespanCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.borderDark.withValues(alpha: 0.45)
+                : AppColors.borderLight.withValues(alpha: 0.85),
+            width: 1,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
+              color: Colors.black.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark ? 0.28 : 0.06,
+              ),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -106,7 +114,7 @@ class ToothbrushLifespanCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 4,
                           offset: const Offset(0, 1),
                         ),

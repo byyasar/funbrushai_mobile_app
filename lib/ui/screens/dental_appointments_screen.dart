@@ -5,6 +5,7 @@ import '../../core/services/dental_appointment_service.dart';
 import '../../data/models/dental_appointment.dart';
 import '../../data/models/toothbrush.dart';
 import '../../data/services/supabase_service.dart';
+import '../widgets/app_banner.dart';
 import 'dental_appointment_detail_screen.dart';
 import 'dental_appointment_form_screen.dart';
 
@@ -118,30 +119,6 @@ class _DentalAppointmentsScreenState extends State<DentalAppointmentsScreen> {
         heroAppointment != null ? filtered.skip(1).toList() : filtered;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          children: [
-            const Text(
-              'Diş Randevularım',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            Text(
-              DateFormat('MMMM yyyy', 'tr').format(DateTime.now()),
-              style: TextStyle(fontSize: 11, color: mutedColor),
-            ),
-          ],
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline_rounded),
-            tooltip: 'Yeni Randevu',
-            onPressed: _openAddForm,
-          ),
-        ],
-      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openAddForm,
         backgroundColor: AppColors.primary,
@@ -152,13 +129,37 @@ class _DentalAppointmentsScreenState extends State<DentalAppointmentsScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadData,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 6, 20, 96),
+      body: SafeArea(
+        child: Column(
+          children: [
+            AppBanner(
+              title: 'Diş Randevularım',
+              subtitle: DateFormat('MMMM yyyy', 'tr').format(DateTime.now()),
+              showBackButton: true,
+              trailing: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.add_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  tooltip: 'Yeni Randevu',
+                  onPressed: _openAddForm,
+                ),
+              ),
+            ),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : RefreshIndicator(
+                      onRefresh: _loadData,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(20, 14, 20, 96),
                 children: [
                   // Aile Üyesi Filtresi
                   SizedBox(
@@ -259,6 +260,10 @@ class _DentalAppointmentsScreenState extends State<DentalAppointmentsScreen> {
                 ],
               ),
             ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

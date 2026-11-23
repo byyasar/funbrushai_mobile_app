@@ -4,6 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/services/dental_appointment_service.dart';
 import '../../data/models/dental_appointment.dart';
 import '../../data/models/toothbrush.dart';
+import '../widgets/app_banner.dart';
 
 class DentalAppointmentFormScreen extends StatefulWidget {
   final List<Toothbrush> familyBrushes;
@@ -197,19 +198,18 @@ class _DentalAppointmentFormScreenState
         isDark ? AppColors.secondaryTextDark : AppColors.secondaryTextLight;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _isEditing ? 'Randevuyu Düzenle' : 'Yeni Randevu Ekle',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+      body: SafeArea(
+        child: Column(
+          children: [
+            AppBanner(
+              title: _isEditing ? 'Randevuyu Düzenle' : 'Yeni Randevu Ekle',
+              showBackButton: true,
+            ),
+            Expanded(
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 32),
           children: [
             // Kimin İçin?
             _buildSectionLabel('Kimin İçin?', mutedColor),
@@ -446,11 +446,12 @@ class _DentalAppointmentFormScreenState
             const SizedBox(height: 16),
 
             // Cihaz Takvimi Senkronizasyonu
-            Container(
-              decoration: BoxDecoration(
-                color: cardBg,
+            Material(
+              color: cardBg,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(
+                side: BorderSide(
                   color: isDark
                       ? Colors.white.withValues(alpha: 0.08)
                       : Colors.black.withValues(alpha: 0.06),
@@ -508,6 +509,10 @@ class _DentalAppointmentFormScreenState
                       fontSize: 15, fontWeight: FontWeight.bold),
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
             ),
           ],
         ),

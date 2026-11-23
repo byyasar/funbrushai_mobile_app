@@ -9,8 +9,6 @@ import '../widgets/app_banner.dart';
 import '../widgets/toothbrush_lifespan_card.dart';
 import 'dental_appointments_screen.dart';
 import 'social_accountability_screen.dart';
-import 'toothbrush_card_screen.dart';
-import 'settings_screen.dart';
 import 'family_leaderboard_screen.dart';
 import '../widgets/app_drawer.dart';
 
@@ -127,24 +125,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 74,
                         child: _buildNavigationCard(
                           context,
-                          title: 'Diş Fırçalarım',
-                          subtitle: 'Fırça durumları ve kullanım ömürleri',
-                          icon: Icons.cleaning_services_rounded,
-                          color: const Color(0xFF2563EB),
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const ToothbrushCardScreen(),
-                              ),
-                            ).then((_) => _loadToothbrushes());
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        height: 74,
-                        child: _buildNavigationCard(
-                          context,
                           title: 'Diş Randevularım',
                           subtitle: _nextAppointment != null
                               ? '${_nextAppointment!.memberName} • ${DateFormat('d MMM', 'tr').format(_nextAppointment!.dateTime)} (${_nextAppointment!.countdownLabel})'
@@ -198,24 +178,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        height: 74,
-                        child: _buildNavigationCard(
-                          context,
-                          title: 'Kullanıcı Avatarını Düzenle',
-                          subtitle: 'Profil fotoğrafı ve avatar seçimi',
-                          icon: Icons.account_circle_rounded,
-                          color: const Color(0xFF059669),
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const SettingsScreen(),
-                              ),
-                            ).then((_) => _loadToothbrushes());
-                          },
-                        ),
-                      ),
                       const SizedBox(height: 16),
                     ],
                   ),
@@ -247,13 +209,15 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark
-              ? Colors.white.withValues(alpha: 0.08)
-              : color.withValues(alpha: 0.15),
-          width: 1.2,
+              ? AppColors.borderDark.withValues(alpha: 0.45)
+              : AppColors.borderLight.withValues(alpha: 0.9),
+          width: 1.1,
         ),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: isDark ? 0.15 : 0.08),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.28)
+                : const Color(0xFF0F172A).withValues(alpha: 0.06),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
@@ -363,16 +327,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark
-              ? Colors.white.withValues(alpha: 0.08)
-              : color.withValues(alpha: 0.15),
-          width: 1.2,
+              ? AppColors.borderDark.withValues(alpha: 0.45)
+              : AppColors.borderLight.withValues(alpha: 0.9),
+          width: 1.1,
         ),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: isDark ? 0.12 : 0.06),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.26)
+                : const Color(0xFF0F172A).withValues(alpha: 0.05),
             blurRadius: 12,
             offset: const Offset(0, 3),
           ),

@@ -10,6 +10,7 @@ import '../../core/services/dental_appointment_service.dart';
 import '../../data/models/dental_appointment.dart';
 import '../../data/models/toothbrush.dart';
 import '../../data/services/supabase_service.dart';
+import '../widgets/app_banner.dart';
 import 'dental_appointment_form_screen.dart';
 
 class DentalAppointmentDetailScreen extends StatefulWidget {
@@ -341,28 +342,32 @@ class _DentalAppointmentDetailScreenState
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'Randevu Detayı',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-            onPressed: () => Navigator.of(context).pop(_hasChanges),
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.edit_rounded),
-              tooltip: 'Düzenle',
-              onPressed: _editAppointment,
-            ),
-          ],
-        ),
-        body: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        body: SafeArea(
+          child: Column(
+            children: [
+              AppBanner(
+                title: 'Randevu Detayı',
+                showBackButton: true,
+                onBackPressed: () => Navigator.of(context).pop(_hasChanges),
+                trailing: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.edit_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                    tooltip: 'Düzenle',
+                    onPressed: _editAppointment,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 32),
           children: [
             // Özet Başlık Kartı
             Container(
@@ -791,6 +796,10 @@ class _DentalAppointmentDetailScreenState
               ],
             ),
           ],
+        ),
+              ),
+            ],
+          ),
         ),
       ),
     );
