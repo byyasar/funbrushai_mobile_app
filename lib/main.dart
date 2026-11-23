@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'core/constants/supabase_constants.dart';
 import 'core/services/device_config_service.dart';
+import 'core/services/music_config_service.dart';
 import 'core/theme/app_theme.dart';
 import 'ui/screens/home_screen.dart';
 
@@ -54,6 +55,12 @@ Future<void> main() async {
     );
   } catch (e) {
     debugPrint('Supabase initialize error: $e');
+  }
+
+  try {
+    await MusicConfigService().init();
+  } catch (e) {
+    debugPrint('MusicConfigService init error: $e');
   }
 
   runApp(

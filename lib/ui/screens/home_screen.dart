@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/services/dental_appointment_service.dart';
+import '../../data/models/dental_appointment.dart';
 import '../../data/models/toothbrush.dart';
 import '../../data/services/supabase_service.dart';
 import '../widgets/app_banner.dart';
 import '../widgets/toothbrush_lifespan_card.dart';
+import 'dental_appointments_screen.dart';
 import 'social_accountability_screen.dart';
 import 'toothbrush_card_screen.dart';
 import 'settings_screen.dart';
@@ -20,6 +24,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Toothbrush> _toothbrushes = [];
+  DentalAppointment? _nextAppointment;
   bool _isLoading = true;
 
   @override
@@ -28,15 +33,25 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadToothbrushes();
   }
 
+  Future<void> _loadNextAppointment() async {
+    final next = await DentalAppointmentService().getNextUpcomingAppointment();
+    if (mounted) {
+      setState(() => _nextAppointment = next);
+    }
+  }
+
   Future<void> _loadToothbrushes() async {
     if (mounted) {
       setState(() => _isLoading = true);
     }
     try {
       final brushes = await SupabaseService().getAllToothbrushes();
+      final nextApt =
+          await DentalAppointmentService().getNextUpcomingAppointment();
       if (mounted) {
         setState(() {
           _toothbrushes = brushes;
+          _nextAppointment = nextApt;
           _isLoading = false;
         });
       }
@@ -122,6 +137,28 @@ class _HomeScreenState extends State<HomeScreen> {
                                 builder: (_) => const ToothbrushCardScreen(),
                               ),
                             ).then((_) => _loadToothbrushes());
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 74,
+                        child: _buildNavigationCard(
+                          context,
+                          title: 'Diş Randevularım',
+                          subtitle: _nextAppointment != null
+                              ? '${_nextAppointment!.memberName} • ${DateFormat('d MMM', 'tr').format(_nextAppointment!.dateTime)} (${_nextAppointment!.countdownLabel})'
+                              : 'Randevu, hatırlatıcı ve kontrol takibi',
+                          icon: Icons.event_note_rounded,
+                          color: const Color(0xFF0D9488),
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => DentalAppointmentsScreen(
+                                  initialBrushes: _toothbrushes,
+                                ),
+                              ),
+                            ).then((_) => _loadNextAppointment());
                           },
                         ),
                       ),

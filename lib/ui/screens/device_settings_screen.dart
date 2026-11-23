@@ -6,6 +6,7 @@ import '../../core/services/device_config_service.dart';
 import '../../data/models/toothbrush.dart';
 import '../../data/services/supabase_service.dart';
 import '../widgets/app_banner.dart';
+import 'music_editor_screen.dart';
 
 class DeviceSettingsScreen extends StatefulWidget {
   const DeviceSettingsScreen({super.key});
@@ -373,7 +374,78 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 18),
+
+                            // Müzik Düzenleme Geçiş Kartı
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: cardColor,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.purple.withValues(alpha: 0.3)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.purple.withValues(alpha: 0.05),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.purple.withValues(alpha: 0.12),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.music_note_rounded, color: Colors.purple, size: 26),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Fırçalama Müziği Düzenleme',
+                                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Müzik yükleyin, her 30 sn\'de bip veya sesli yönlendirme ekleyin.',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.purple,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => const MusicEditorScreen(),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text('Düzenle', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
 
                             // Cihaz Bilgileri Kartı
                             Container(

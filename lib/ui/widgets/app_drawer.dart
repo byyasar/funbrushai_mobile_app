@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/providers/theme_provider.dart';
+import '../screens/dental_appointments_screen.dart';
 import '../screens/family_leaderboard_screen.dart';
 import '../screens/device_settings_screen.dart';
+import '../screens/music_editor_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   final VoidCallback? onRefreshNeeded;
@@ -66,6 +68,21 @@ class AppDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
+                  leading: const Icon(Icons.event_note_rounded, color: Color(0xFF0D9488)),
+                  title: const Text('Diş Randevularım'),
+                  subtitle: const Text('Takvim, hatırlatıcı ve geçmiş', style: TextStyle(fontSize: 11)),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  onTap: () async {
+                    Navigator.pop(context); // Close drawer
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const DentalAppointmentsScreen(),
+                      ),
+                    );
+                    onRefreshNeeded?.call();
+                  },
+                ),
+                ListTile(
                   leading: const Icon(Icons.settings_input_composite, color: AppColors.primary),
                   title: const Text('Cihaz Ayarları'),
                   subtitle: const Text('Cihaz ID & Veritabanı', style: TextStyle(fontSize: 11)),
@@ -75,6 +92,21 @@ class AppDrawer extends StatelessWidget {
                     await Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => const DeviceSettingsScreen(),
+                      ),
+                    );
+                    onRefreshNeeded?.call();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.music_note_rounded, color: Colors.purple),
+                  title: const Text('Müzik Düzenleme'),
+                  subtitle: const Text('30 sn aralıklı fırçalama müziği', style: TextStyle(fontSize: 11)),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  onTap: () async {
+                    Navigator.pop(context); // Close drawer
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const MusicEditorScreen(),
                       ),
                     );
                     onRefreshNeeded?.call();
