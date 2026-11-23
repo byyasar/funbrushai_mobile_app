@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/services/audio_mixer_service.dart';
 import '../../core/services/music_config_service.dart';
 import '../widgets/app_banner.dart';
 
@@ -28,6 +29,7 @@ class _MusicEditorScreenState extends State<MusicEditorScreen> {
   String? _currentMusicName;
   bool _isLoadingFile = false;
   bool _isSaving = false;
+  String _savingStatusText = 'Birleştiriliyor...';
 
   @override
   void initState() {
@@ -125,9 +127,9 @@ class _MusicEditorScreenState extends State<MusicEditorScreen> {
       return;
     }
 
-    final originalExt = _currentMusicPath!.split('.').last;
+    const outputExt = 'mp3';
     final defaultBaseName = (_currentMusicName != null && _currentMusicName!.isNotEmpty)
-        ? _currentMusicName!.replaceAll(RegExp(r'\.[a-zA-Z0-9]+$'), '')
+        ? '${_currentMusicName!.replaceAll(RegExp(r'\.[a-zA-Z0-9]+$'), '')}_fircalama'
         : 'fircalama_muzigi';
 
     final nameController = TextEditingController(text: defaultBaseName);
@@ -219,7 +221,7 @@ class _MusicEditorScreenState extends State<MusicEditorScreen> {
                           decoration: InputDecoration(
                             labelText: 'Dosya İsmi',
                             hintText: 'Örn: cocuk_fircalama_muzigi',
-                            suffixText: '.$originalExt',
+                            suffixText: '.$outputExt',
                             prefixIcon: const Icon(Icons.drive_file_rename_outline),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             focusedBorder: OutlineInputBorder(
@@ -311,7 +313,7 @@ class _MusicEditorScreenState extends State<MusicEditorScreen> {
                                 onPressed: () async {
                                   nameFocusNode.unfocus();
                                   final cleanName = nameController.text.trim().replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
-                                  final finalFileName = cleanName.isNotEmpty ? '$cleanName.$originalExt' : 'fircalama_muzigi.$originalExt';
+                                  final finalFileName = cleanName.isNotEmpty ? '$cleanName.$outputExt' : 'fircalama_muzigi.$outputExt';
 
                                   Navigator.pop(sheetCtx);
                                   await _performSaveWithLocationAndName(
@@ -344,41 +346,65 @@ class _MusicEditorScreenState extends State<MusicEditorScreen> {
     required String fileName,
     required String baseName,
   }) async {
-    setState(() => _isSaving = true);
+    setState(() {
+      _isSaving = true;
+      _savingStatusText = 'Sesler hazırlanıyor...';
+    });
     try {
-      String savedPath;
+      await _musicService.stopPreview();
 
-      if (targetDirectory != null && Directory(targetDirectory).existsSync()) {
-        final destPath = '$targetDirectory/$fileName';
-        final destFile = File(destPath);
-        if (await destFile.exists()) {
-          await destFile.delete();
-        }
-        await File(_currentMusicPath!).copy(destPath);
-        savedPath = destPath;
-      } else {
-        final appDir = await getApplicationDocumentsDirectory();
-        final musicDir = Directory('${appDir.path}/brushing_music');
-        if (!await musicDir.exists()) {
-          await musicDir.create(recursive: true);
-        }
-        final destPath = '${musicDir.path}/$fileName';
-        final destFile = File(destPath);
-        if (await destFile.exists()) {
-          await destFile.delete();
-        }
-        await File(_currentMusicPath!).copy(destPath);
-        savedPath = destPath;
+      final appDir = await getApplicationDocumentsDirectory();
+      final musicDir = Directory('${appDir.path}/brushing_music');
+      if (!await musicDir.exists()) {
+        await musicDir.create(recursive: true);
       }
 
-      setState(() {
-        _currentMusicPath = savedPath;
-        _currentMusicName = fileName;
-      });
+      final internalDestPath = '${musicDir.path}/$fileName';
+      String savedPath = internalDestPath;
+      bool usedFallbackDir = false;
 
+      // Önce uygulama içi güvenli dizine gerçek birleştirilmiş MP3 üret
+      final mixedPath = await AudioMixerService.exportMixedBrushingMusic(
+        sourceMusicPath: _currentMusicPath!,
+        outputMp3Path: internalDestPath,
+        alertType: _alertType,
+        singleTtsText: _singleTtsController.text.trim().isNotEmpty
+            ? _singleTtsController.text.trim()
+            : 'Diğer bölgeye geçin',
+        intervalTtsTexts: _intervalControllers.map((c) => c.text.trim()).toList(),
+        useSeparateTexts: _useSeparateTexts,
+        musicVolume: _musicVolume,
+        alertVolume: _alertVolume,
+        onProgress: (status) {
+          if (mounted) {
+            setState(() => _savingStatusText = status);
+          }
+        },
+      );
+
+      // Kullanıcı özel bir klasör seçtiyse oraya da kopyalamayı dene
+      if (targetDirectory != null && Directory(targetDirectory).existsSync()) {
+        try {
+          final externalDestPath = '$targetDirectory/$fileName';
+          final externalFile = File(externalDestPath);
+          if (await externalFile.exists()) {
+            await externalFile.delete();
+          }
+          await File(mixedPath).copy(externalDestPath);
+          savedPath = externalDestPath;
+        } catch (_) {
+          // Android Scoped Storage nedeniyle harici klasöre yazılamazsa uygulama klasöründe kalır
+          savedPath = mixedPath;
+          usedFallbackDir = true;
+        }
+      } else {
+        savedPath = mixedPath;
+      }
+
+      // Kaynak müziği (_currentMusicPath) koru ki tekrar önizleme/kayıtta çift uyarı binmesin
       final updatedConfig = MusicConfig(
-        musicPath: savedPath,
-        musicName: fileName,
+        musicPath: _currentMusicPath,
+        musicName: _currentMusicName,
         alertType: _alertType,
         singleTtsText: _singleTtsController.text.trim().isNotEmpty
             ? _singleTtsController.text.trim()
@@ -392,19 +418,21 @@ class _MusicEditorScreenState extends State<MusicEditorScreen> {
       await _musicService.saveConfig(updatedConfig);
 
       if (mounted) {
+        final msg = usedFallbackDir
+            ? 'Sesler birleştirildi ve uygulama klasörüne "$fileName" adıyla kaydedildi (Paylaş ile dışa aktarabilirsiniz).'
+            : 'Sesler birleştirildi! "$fileName" başarıyla kaydedildi.';
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: [
                 const Icon(Icons.check_circle, color: Colors.white),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text('Müzik "$fileName" adıyla başarıyla kaydedildi!'),
-                ),
+                Expanded(child: Text(msg)),
               ],
             ),
             backgroundColor: AppColors.greenSuccess,
-            duration: const Duration(seconds: 5),
+            duration: const Duration(seconds: 6),
             action: SnackBarAction(
               label: 'Paylaş',
               textColor: Colors.white,
@@ -426,7 +454,10 @@ class _MusicEditorScreenState extends State<MusicEditorScreen> {
       }
     } finally {
       if (mounted) {
-        setState(() => _isSaving = false);
+        setState(() {
+          _isSaving = false;
+          _savingStatusText = 'Birleştiriliyor...';
+        });
       }
     }
   }
@@ -549,7 +580,7 @@ class _MusicEditorScreenState extends State<MusicEditorScreen> {
                             )
                           : const Icon(Icons.save_rounded, color: Colors.white),
                       label: Text(
-                        _isSaving ? 'Kaydediliyor...' : 'Fırçalama Müziğini Kaydet',
+                        _isSaving ? _savingStatusText : 'Fırçalama Müziğini Kaydet',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,

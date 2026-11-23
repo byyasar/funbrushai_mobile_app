@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/services/device_config_service.dart';
 import '../models/brushing_record.dart';
+import '../models/dental_appointment.dart';
 import '../models/social_user.dart';
 import '../models/toothbrush.dart';
 import '../models/family_member_score.dart';
@@ -459,5 +460,47 @@ class SupabaseService {
     } catch (e) {
       debugPrint('Error updating mascot name in Supabase: $e');
     }
+  }
+
+  // --- Diş Randevuları (dis_randevulari) ---
+
+  Future<List<DentalAppointment>> getDentalAppointments({
+    String? targetDeviceId,
+  }) async {
+    final deviceId = (targetDeviceId ?? await _getDeviceId()).trim();
+    var query = _client.from('dis_randevulari').select();
+    if (deviceId.isNotEmpty) {
+      query = query.eq('cihaz_id', deviceId);
+    }
+    final response = await query.order('randevu_tarihi', ascending: true);
+    final List<dynamic> data = response as List<dynamic>;
+    return data
+        .whereType<Map<String, dynamic>>()
+        .map(DentalAppointment.fromSupabaseJson)
+        .toList();
+  }
+
+  Future<void> upsertDentalAppointment(
+    DentalAppointment appointment, {
+    String? targetDeviceId,
+  }) async {
+    final deviceId = (targetDeviceId ?? await _getDeviceId()).trim();
+    final effectiveDeviceId =
+        deviceId.isNotEmpty ? deviceId : DeviceConfigService.defaultDeviceId;
+    await _client
+        .from('dis_randevulari')
+        .upsert(appointment.toSupabaseJson(effectiveDeviceId));
+  }
+
+  Future<void> deleteDentalAppointment(
+    String id, {
+    String? targetDeviceId,
+  }) async {
+    final deviceId = (targetDeviceId ?? await _getDeviceId()).trim();
+    var query = _client.from('dis_randevulari').delete().eq('id', id);
+    if (deviceId.isNotEmpty) {
+      query = query.eq('cihaz_id', deviceId);
+    }
+    await query;
   }
 }

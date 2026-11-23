@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/services/dental_appointment_service.dart';
+import '../../core/services/device_calendar_service.dart';
 import '../../data/models/dental_appointment.dart';
 import '../../data/models/toothbrush.dart';
 import '../widgets/app_banner.dart';
@@ -183,6 +184,29 @@ class _DentalAppointmentFormScreenState
     );
 
     await DentalAppointmentService().saveAppointment(appointment);
+
+    if (_syncWithCalendar) {
+      final calResult =
+          await DeviceCalendarService.upsertAppointmentInCalendar(appointment);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(calResult.message),
+            backgroundColor: calResult.success
+                ? AppColors.greenSuccess
+                : AppColors.amberAccent,
+          ),
+        );
+      }
+    } else if (_isEditing) {
+      final delResult = await DeviceCalendarService
+          .deleteAppointmentFromCalendar(appointment.id);
+      if (mounted && delResult.message.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(delResult.message)),
+        );
+      }
+    }
 
     if (mounted) {
       Navigator.of(context).pop(appointment);

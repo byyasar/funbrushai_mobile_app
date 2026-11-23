@@ -198,4 +198,51 @@ class DentalAppointment {
           .toList(),
     );
   }
+
+  Map<String, dynamic> toSupabaseJson(String cihazId) => {
+        'id': id,
+        'cihaz_id': cihazId,
+        'firca_id': brushId,
+        'kullanici_adi': memberName,
+        'islem_turu': appointmentType,
+        'randevu_tarihi': dateTime.toUtc().toIso8601String(),
+        'hekim_adi': doctorName,
+        'klinik_adi': clinicName,
+        'adres': address,
+        'notlar': notes,
+        'hatirlaticilar': reminders,
+        'takvim_senkron': syncWithCalendar,
+        'tamamlandi': isCompleted,
+        'kontrol_listesi': checklist.map((e) => e.toJson()).toList(),
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      };
+
+  factory DentalAppointment.fromSupabaseJson(Map<String, dynamic> json) {
+    final rawChecklist = json['kontrol_listesi'] as List<dynamic>? ?? [];
+    final rawReminders = json['hatirlaticilar'] as List<dynamic>? ?? [];
+    final parsedDate =
+        DateTime.tryParse(json['randevu_tarihi']?.toString() ?? '')?.toLocal() ??
+            DateTime.now();
+
+    return DentalAppointment(
+      id: json['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      memberName: json['kullanici_adi']?.toString() ?? 'Kullanıcı',
+      brushId: json['firca_id']?.toString(),
+      appointmentType: json['islem_turu']?.toString() ?? 'Rutin Kontrol',
+      dateTime: parsedDate,
+      doctorName: json['hekim_adi']?.toString() ?? '',
+      clinicName: json['klinik_adi']?.toString() ?? '',
+      address: json['adres']?.toString() ?? '',
+      notes: json['notlar']?.toString() ?? '',
+      reminders: rawReminders.map((e) => e.toString()).toList(),
+      syncWithCalendar: json['takvim_senkron'] != false,
+      isCompleted: json['tamamlandi'] == true,
+      checklist: rawChecklist
+          .whereType<Map>()
+          .map((e) => AppointmentChecklistItem.fromJson(
+                Map<String, dynamic>.from(e),
+              ))
+          .toList(),
+    );
+  }
 }

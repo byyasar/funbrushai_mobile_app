@@ -51,6 +51,12 @@
 	<string>Avatar ve profil fotoğrafı seçebilmeniz için fotoğraf galerinize erişim izni gereklidir.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Profil fotoğraflarını galerinize kaydedebilmeniz için erişim izni gereklidir.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Diş randevularınızı cihaz takviminize eklemek, güncellemek ve silmek için takvim erişimi gereklidir.</string>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>Diş randevularınızı cihaz takviminize eklemek ve hatırlatıcı oluşturmak için takvim erişimi gereklidir.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Diş randevularınızı cihaz takviminizde eklemek, güncellemek ve silmek için tam takvim erişimi gereklidir.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

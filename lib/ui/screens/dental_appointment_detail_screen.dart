@@ -7,6 +7,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/services/dental_appointment_service.dart';
+import '../../core/services/device_calendar_service.dart';
 import '../../data/models/dental_appointment.dart';
 import '../../data/models/toothbrush.dart';
 import '../../data/services/supabase_service.dart';
@@ -132,8 +133,16 @@ class _DentalAppointmentDetailScreenState
       ),
     );
     if (confirmed == true) {
+      final calDel = await DeviceCalendarService.deleteAppointmentFromCalendar(
+        _appointment.id,
+      );
       await DentalAppointmentService().deleteAppointment(_appointment.id);
       if (mounted) {
+        if (calDel.message.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(calDel.message)),
+          );
+        }
         Navigator.of(context).pop(true);
       }
     }
@@ -726,23 +735,54 @@ class _DentalAppointmentDetailScreenState
                           ),
                         ),
                       ),
-                      if (_appointment.syncWithCalendar)
-                        Container(
+                      InkWell(
+                        onTap: () async {
+                          final res = await DeviceCalendarService
+                              .addAppointmentToCalendar(_appointment);
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(res.message),
+                              backgroundColor: res.success
+                                  ? AppColors.greenSuccess
+                                  : AppColors.amberAccent,
+                            ),
+                          );
+                          if (res.success && !_appointment.syncWithCalendar) {
+                            final updated =
+                                _appointment.copyWith(syncWithCalendar: true);
+                            setState(() {
+                              _appointment = updated;
+                              _hasChanges = true;
+                            });
+                            await DentalAppointmentService()
+                                .saveAppointment(updated);
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: AppColors.greenSuccess.withValues(alpha: 0.15),
+                            color: _appointment.syncWithCalendar
+                                ? AppColors.greenSuccess.withValues(alpha: 0.15)
+                                : AppColors.primary.withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Text(
-                            '📆 Takvimde',
+                          child: Text(
+                            _appointment.syncWithCalendar
+                                ? '📆 Takvimde Güncelle'
+                                : '📆 Takvime Ekle',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.greenSuccess,
+                              color: _appointment.syncWithCalendar
+                                  ? AppColors.greenSuccess
+                                  : AppColors.primary,
                             ),
                           ),
                         ),
+                      ),
                     ],
                   ),
                 ],

@@ -8,6 +8,37 @@ import 'package:path_provider/path_provider.dart';
 class TtsSaveService {
   static const MethodChannel _channel = MethodChannel('com.funbrushai.app/tts_save');
 
+  /// TTS metnini geçici veya belirtilen yola 16-bit PCM WAV olarak sentezler.
+  static Future<String?> synthesizeTtsToWav({
+    required String text,
+    required String outputWavPath,
+    String language = 'tr-TR',
+    double pitch = 1.0,
+    double speechRate = 0.5,
+  }) async {
+    try {
+      final result = await _channel.invokeMethod('saveTtsToFile', {
+        'text': text,
+        'filePath': outputWavPath,
+        'language': language,
+        'pitch': pitch,
+        'speechRate': speechRate,
+      });
+
+      if (result == true && await File(outputWavPath).exists()) {
+        return outputWavPath;
+      }
+      debugPrint('TTS WAV synthesis failed: $result');
+      return null;
+    } on PlatformException catch (e) {
+      debugPrint('Platform error synthesizing TTS WAV: ${e.message}');
+      return null;
+    } catch (e) {
+      debugPrint('Error synthesizing TTS WAV: $e');
+      return null;
+    }
+  }
+
   /// TTS sesini MP3 olarak kaydet
   /// [text] - Söylenecek metin
   /// [fileName] - Dosya adı (opsiyonel, otomatik oluşturulur)
@@ -30,15 +61,15 @@ class TtsSaveService {
       final mp3FilePath = '${directory.path}/$name';
       final tempWavPath = '${directory.path}/_temp_tts_$timestamp.wav';
 
-      final result = await _channel.invokeMethod('saveTtsToFile', {
-        'text': text,
-        'filePath': tempWavPath,
-        'language': language,
-        'pitch': pitch,
-        'speechRate': speechRate,
-      });
+      final wavPath = await synthesizeTtsToWav(
+        text: text,
+        outputWavPath: tempWavPath,
+        language: language,
+        pitch: pitch,
+        speechRate: speechRate,
+      );
 
-      if (result == true) {
+      if (wavPath != null) {
         final encodedPath = await convertWavToMp3(tempWavPath, mp3FilePath);
         final tempFile = File(tempWavPath);
         if (await tempFile.exists()) {
@@ -49,7 +80,7 @@ class TtsSaveService {
           return encodedPath;
         }
       }
-      debugPrint('TTS save failed: $result');
+      debugPrint('TTS save failed');
       return null;
     } on PlatformException catch (e) {
       debugPrint('Platform error saving TTS: ${e.message}');
