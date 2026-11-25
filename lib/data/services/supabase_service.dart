@@ -314,7 +314,9 @@ class SupabaseService {
         }
 
         final now = DateTime.now();
-        final renewalDate = now.add(const Duration(days: 90));
+        final renewalDate = now.add(
+          const Duration(days: Toothbrush.defaultRenewalPeriodDays),
+        );
         final renewalDateStr = '${renewalDate.day.toString().padLeft(2, '0')}.${renewalDate.month.toString().padLeft(2, '0')}.${renewalDate.year}';
 
         final newRecords = missingBrushes.map((brushId) {
@@ -324,7 +326,7 @@ class SupabaseService {
             'firca_id': brushId,
             'kullanici_adi': '',
             'yenilenme_tarihi': renewalDateStr,
-            'yenilenme_zamani': '90',
+            'yenilenme_zamani': '${Toothbrush.defaultRenewalPeriodDays}',
             'created_at': now.toIso8601String(),
           };
         }).toList();
@@ -355,6 +357,25 @@ class SupabaseService {
       final inactiveSet = await DeviceConfigService.getInactiveBrushIds(deviceId);
 
       final List<dynamic> data = response as List<dynamic>;
+      // Veritabanında hâlâ 180 gün (6 ay) kayıtlı fırçaları 120 güne (4 ay) çek
+      final legacyIds = data
+          .where((json) =>
+              json is Map &&
+              int.tryParse(json['yenilenme_zamani']?.toString() ?? '') == 180 &&
+              json['id'] != null)
+          .map((json) => json['id'])
+          .toList();
+      if (legacyIds.isNotEmpty) {
+        try {
+          await _client
+              .from('dis_fircalari')
+              .update({'yenilenme_zamani': '${Toothbrush.defaultRenewalPeriodDays}'})
+              .inFilter('id', legacyIds);
+        } catch (e) {
+          debugPrint('Error migrating legacy 180-day brushes to 120 days: $e');
+        }
+      }
+
       return data.map((json) {
         final brush = Toothbrush.fromJson(json);
         final isActive = !inactiveSet.contains(brush.fircaId);
@@ -373,7 +394,10 @@ class SupabaseService {
       
       await _client
           .from('dis_fircalari')
-          .update({'yenilenme_tarihi': dateStr})
+          .update({
+            'yenilenme_tarihi': dateStr,
+            'yenilenme_zamani': '${Toothbrush.defaultRenewalPeriodDays}',
+          })
           .eq('id', id);
           
       debugPrint('Updated renewal date for brush $id to $dateStr');

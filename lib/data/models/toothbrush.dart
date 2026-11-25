@@ -1,4 +1,6 @@
 class Toothbrush {
+  static const int defaultRenewalPeriodDays = 120; // 4 ay
+
   final String id;
   final String name; // Keeping for backward compatibility if needed, or can be derived
   final String fircaId;
@@ -100,9 +102,13 @@ class Toothbrush {
 
     final fircaId = json['firca_id']?.toString() ?? '';
     final userName = json['kullanici_adi'] ?? 'Unknown User';
-    final renewalPeriod = json['yenilenme_zamani'] is int 
-        ? json['yenilenme_zamani'] 
-        : int.tryParse(json['yenilenme_zamani']?.toString() ?? '90') ?? 90;
+    final parsedRenewalPeriod = json['yenilenme_zamani'] is int
+        ? json['yenilenme_zamani'] as int
+        : int.tryParse(json['yenilenme_zamani']?.toString() ?? '') ??
+            defaultRenewalPeriodDays;
+    // Eski 6 aylık (180 gün) varsayılanı 4 aya (120 gün) çek
+    final renewalPeriod =
+        parsedRenewalPeriod == 180 ? defaultRenewalPeriodDays : parsedRenewalPeriod;
 
     return Toothbrush(
       id: json['id'].toString(),
